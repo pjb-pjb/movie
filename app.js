@@ -40,7 +40,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-app.listen(80,function () {
+app.listen(8002,function () {
     console.log("...");
 });
 module.exports = app;
