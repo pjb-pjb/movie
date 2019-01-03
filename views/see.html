@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+        <meta name="referrer" content="no-referrer">
         <title></title>
         <script src="/javascripts/mui.min.js"></script>
         <link href="/stylesheets/mui.min.css" rel="stylesheet"/>
@@ -16,7 +17,7 @@
             <ul class="mui-table-view">
                 <% for(var i = 0;i < data.length;i++){ %>
                     <li class="mui-table-view-cell mui-media">
-                        <a href="<%=data[i].url%>">
+                        <a href="<%=data[i].url%>" target="_blank">
                             <img class="mui-media-object mui-pull-left" src="<%= data[i].imgPath %>">
                             <div class="mui-media-body" style="font-size: 16px;">
                                 <%=data[i].title%>
@@ -38,6 +39,7 @@
             },1000);
         </script>
         <% } %>
+
     </div>
     </body>
 </html>

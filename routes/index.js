@@ -9,7 +9,6 @@ router.get('/', function (req, res, next) {
     res.sendfile("index.html");
 });
 router.get("/search", function (req, res) {
-
     var con = req.query.con;
     var yuan = req.query.yuan;
     // 通过 GET 请求来读取 http://cnodejs.org/ 的内容
@@ -43,14 +42,18 @@ router.get("/search", function (req, res) {
             if (!error && response.statusCode == 200) {
                 // 输出网页内容
                 var $ = cheerio.load(body);
+                // console.log(body);
                 var data = [];
-                $(".series-item").each(function (val, ele) {
-                    data.push({
-                        url: "http://jx.52xftv.cn/?url=" + $(ele).find(".result_title").find("a").attr("href"),
-                        text: $(ele).find(".info_item_bottom").find("a").text(),
-                        title: $(ele).find(".result_title").find("a").text(),
-                        imgPath: "https:" + $(ele).find(".figure-wrapper a img").attr("src")
-                    });
+                $(".list_item").each(function (val, ele) {
+                    if($(ele).find(".bottom_left a.info_play_btn").attr("href")){
+                        data.push({
+                            url: "http://jx.52xftv.cn/?url=" + $(ele).find(".bottom_left a.info_play_btn").attr("href"),
+                            text: $(ele).find(".info_item_bottom").find("a").text(),
+                            title: $(ele).find(".result_title").find("a").text(),
+                            imgPath: "https:" + $(ele).find("a.figure img").attr("src")
+                        });
+                    }
+
                 });
                 res.render("see", {data: data});
             } else {
