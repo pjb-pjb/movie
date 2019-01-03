@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <title></title>
+    <script src="/javascripts/mui.min.js"></script>
+    <link href="/stylesheets/mui.min.css" rel="stylesheet"/>
+    <script type="text/javascript" charset="utf-8">
+        mui.init();
+    </script>
+</head>
+<body>
+<div class="mui-content"  style="max-width: 640px;margin: 0 auto;position: relative;height: 100vh">
+    <div style="position: absolute;top: 50%;transform: translateY(-290%);width: 100%;left: 0;right: 0;margin: 0 auto;width: 90%;">
+        <form action="/search" class="mui-input-group" style="background: transparent">
+            <div class="mui-input-row">
+                <input type="text" class="mui-input-clear con" placeholder="请输入电影名" name="con">
+            </div>
+        </form>
+    </div>
+    <button type="button" data-loading-text="搜索中" class="mui-btn mui-btn-primary" style="width: 90%;margin: 0 auto;display: block;position: absolute;left: 0;right: 0;bottom: 20%;"><i class="mui-icon mui-icon-search" style="font-size: 18px;vertical-align: middle"></i>搜索</button>
+
+    <script>
+        mui(document.body).on('click', '.mui-btn', function(e) {
+            var con = document.querySelector(".con").value;
+            if(con==""){
+                mui.alert("请输入电影名");
+            }else {
+                mui(this).button('loading');
+                window.location = "/search?con="+con;
+            }
+        });
+    </script>
+</div>
+
+</body>
+</html>
