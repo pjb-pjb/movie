@@ -1,45 +1,235 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-        <meta name="referrer" content="no-referrer">
-        <title></title>
-        <script src="/javascripts/mui.min.js"></script>
-        <link href="/stylesheets/mui.min.css" rel="stylesheet"/>
-        <script type="text/javascript" charset="utf-8">
-            mui.init();
-        </script>
-    </head>
-    <body>
-    <div class="mui-content" style="max-width: 640px;margin: 0 auto;">
-    <% if(data.length){ %>
-            <ul class="mui-table-view">
-                <% for(var i = 0;i < data.length;i++){ %>
-                    <li class="mui-table-view-cell mui-media">
-                        <a href="<%=data[i].url%>" target="_blank">
-                            <img class="mui-media-object mui-pull-left" src="<%= data[i].imgPath %>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <meta name="referrer" content="no-referrer">
+    <title></title>
+    <script src="/javascripts/mui.min.js"></script>
+    <link href="/stylesheets/mui.min.css" rel="stylesheet"/>
+    <script type="text/javascript" charset="utf-8">
+        mui.init();
+    </script>
+</head>
+<style>
+    .mui-backdrop {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 998;
+        background-color: #fff;
+    }
+
+    ul, li {
+        list-style: none;
+    }
+    .mui-popup-text{
+        color: red;
+    }
+</style>
+<body>
+<div class="mui-content" style="max-width: 640px;margin: 0 auto;height: calc(100vh - 50px);">
+    <!-- 侧滑导航根容器 -->
+    <div class="mui-off-canvas-wrap mui-draggable">
+        <!-- 菜单容器 -->
+        <aside class="mui-off-canvas-left" style="background: #000">
+            <div class="mui-scroll-wrapper">
+                <div class="mui-scroll" style="color: #fff">
+                    <ul class="line-box" style="box-sizing: border-box;padding: 30px 30px;">
+                    </ul>
+                </div>
+            </div>
+        </aside>
+        <!-- 主页面容器 -->
+        <div class="mui-inner-wrap">
+             <!--主页面标题-->
+            <!--<header class="mui-bar mui-bar-nav">-->
+            <!--&lt;!&ndash;<a class="mui-icon mui-action-menu mui-icon-bars mui-pull-left"></a>&ndash;&gt;-->
+            <!--<h1 class="mui-title">如果视频加载失败,可尝试刷新页面,或向右侧滑选择路线</h1>-->
+            <!--</header>-->
+            <div class="mui-content mui-scroll-wrapper" style="padding-top: 5px;padding-bottom: 10px;">
+                <div class="mui-scroll">
+                    <div id="loading" class="" style="width: 100%;position: fixed;top: 0;left: 0;z-index: 1000;">
+                        <span></span>
+                    </div>
+                    <ul class="mui-table-view data-box">
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="sheet1" class="mui-popover mui-popover-bottom mui-popover-action"
+         style="z-index: 999;max-width: 640px;left: 0;right: 0;margin: 0 auto">
+        <!-- 可选择菜单 -->
+        <ul class="mui-table-view">
+            <li class="mui-table-view-cell">
+                <a href="javascript:" onclick="getData('qq',this)" id="qq">腾讯</a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a href="javascript:" onclick="getData('iqiyi',this)">爱奇艺</a>
+            </li>
+            <li class="mui-table-view-cell">
+                <a href="javascript:" onclick="getData('mgtv',this)">芒果</a>
+            </li>
+        </ul>
+    </div>
+    <div href="javascript:" onclick="select(this)" id="openPopover"
+         class="mui-btn mui-btn-primary mui-btn-block select"
+         style="z-index: 997;display: none;position: fixed;max-width: 640px;left: 0;right: 0;margin: 0 auto;bottom: 0;">腾讯</div>
+</div>
+
+<script>
+    // var mask = mui.createMask();//callback为用户点击蒙版时自动执行的回调；
+    let lineDatas = [
+        {
+            name: "默认线路",
+            path: "http://app.baiyug.cn:2019/vip/index.php"
+        },
+        {
+            name: "推荐线路1",
+            path: "http://jiexi.071811.cc/jx2.php"
+        },
+        {
+            name: "推荐线路2",
+            path: "http://app.baiyug.cn:2019/vip/"
+        },
+        {
+            name: "超稳定",
+            path: "http://jx.du2.cc/jx6.php"
+        },
+        {
+            name: "快速",
+            path: "http://jx.du2.cc/jx4.php"
+        },
+        {
+            name: "清晰",
+            path: "https://api.47ks.com/webcloud"
+        },
+        {
+            name: "加速",
+            path: "http://jx.du2.cc"
+        }
+    ];
+    //默认路线
+    let index = 0;
+    function show() {
+        // mask.show();
+        mui("#loading").progressbar().show();
+    }
+
+    function close() {
+        // mask.close();
+        mui("#loading").progressbar().hide();
+    }
+
+    function showSel() {
+        document.querySelector(".select").style.display = "block";
+    }
+
+    function select(that) {
+        mui('#sheet1').popover('show');
+        that.style.display = "none";
+        if(mui('.mui-off-canvas-wrap').offCanvas().isShown()){
+            mui('.mui-off-canvas-wrap').offCanvas().close();
+        }
+    }
+
+    function getQueryString(name) {
+        var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return decodeURI(r[2]);
+        }
+        return null;
+    }
+
+    function getData(source, that) {
+        mui('#sheet1').popover('hide');
+        show();
+        var ul = document.querySelector(".data-box");
+        ul.innerHTML = "";
+        mui.ajax("/" + source, {
+            data: {
+                con: getQueryString("con")
+            },
+            dataType: "json",
+            success(data) {
+                if (data.code == 0) {
+                    if (data.data.length == 0) {
+                        errorCz("没有搜索到数据~~~ 切换搜索源");
+                        document.querySelector(".select").style.display = "block";
+                        document.querySelector(".select").innerHTML = that.innerHTML;
+                        mui.toast('点击下方按钮切换搜索源', {duration: 1000, type: 'div'});
+
+                        return;
+                    }
+                    close();
+                    data.data.forEach((val, index) => {
+                        var li = document.createElement("li");
+                        li.className = "mui-table-view-cell mui-media";
+                        li.innerHTML = `<div>
+                        <a class="movie-link" style="color: inherit" data="${val.url}" href="javascript:" target="_blank">
+                            <img class="mui-media-object mui-pull-left" src="${val.imgPath}">
                             <div class="mui-media-body" style="font-size: 16px;">
-                                <%=data[i].title%>
-                                <p class='mui-ellipsis'><button style="font-size: 12px;padding: 3px 10px;" type="button" class="mui-btn mui-btn-danger"><%=data[i].text%></button></p>
+                                ${val.title}&nbsp;&nbsp;&nbsp;<span style="font-size: 14px">${val.time}</span>
+                                <p class='mui-ellipsis'><button style="font-size: 12px;padding: 3px 10px;" type="button" class="mui-btn mui-btn-danger">${val.text}</button></p>
                             </div>
                         </a>
-                    </li>
-                <% } %>
-            </ul>
-        <% } else{%>
-            <div style="text-align: center;padding: 0 20px;box-sizing: border-box;position: fixed;top: 200px;left: 0;width: 100%;">没有找到您搜索的内容<span>3</span>s后自动跳回首页<br/><a href="/">点击回到首页</a></div>
-        <script>
-            var time = setInterval(function () {
-                if(document.querySelector("span").innerHTML == 1){
-                    clearInterval(time);
-                    window.location = "/";
+                    </div>`;
+                        ul.appendChild(li);
+                        document.querySelector(".select").style.display = "block";
+                        document.querySelector(".select").innerHTML = that.innerHTML;
+                    });
+                    if(!localStorage.flag){
+                        mui.alert("如果视频加载失败,可尝试刷新页面,或向右侧滑选择路线","温馨提示",function () {
+                            localStorage.flag = "yes";
+                        });
+                    }
+                    mui.toast('点击下方按钮切换搜索源', {duration: 1000, type: 'div'});
+                } else {
+                    errorCz("服务器偷懒了~~~~");
                 }
-                document.querySelector("span").innerHTML -= 1;
-            },1000);
-        </script>
-        <% } %>
+            },
+            error() {
+                errorCz("服务器偷懒了~~~~");
+            }
+        });
+    }
 
-    </div>
-    </body>
+    function errorCz(msg) {
+        close();
+        if (!msg) {
+            msg = "出错了~~~";
+        }
+        document.querySelector(".data-box").innerHTML = `<div style="width: 100%;height: calc(100vh - 55px);line-height: 300px;background: #efeff4;text-align: center">${msg}</div>`;
+    }
+
+    mui(document.body).on("click", ".mui-backdrop", showSel);
+    getData("qq", document.querySelector("#qq"));
+    mui("body").on("tap",".mui-inner-wrap",function () {
+        if(mui('.mui-off-canvas-wrap').offCanvas().isShown()){
+            mui('.mui-off-canvas-wrap').offCanvas().close();
+        }
+    });
+    let lineBox = document.querySelector(".line-box");
+    let str = "";
+    lineDatas.forEach(function (val, index) {
+        str += `
+                <li style="box-sizing: border-box;line-height: 50px;cursor: pointer" id="${index}">${val.name}</li>
+                `;
+    });
+    lineBox.innerHTML = str;
+    mui(".line-box").on("tap","li",function () {
+        index = this.id*1;
+        mui('.mui-off-canvas-wrap').offCanvas().close();
+    });
+    mui("body").on("tap",".movie-link",function () {
+        window.open(lineDatas[index].path+this.getAttribute("data"));
+    });
+</script>
+</body>
 </html>

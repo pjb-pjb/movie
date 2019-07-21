@@ -13,57 +13,44 @@
 </head>
 <body>
 <div class="mui-content"  style="max-width: 640px;margin: 0 auto;position: relative;height: 100vh">
-    <div style="position: absolute;transform: translateY(-190%);left: 0;right: 0;bottom:0;margin: 0 auto;width: 90%;">
-        <form action="/search" class="mui-input-group" style="background: transparent">
+    <div style="position: absolute;left: 0;right: 0;bottom:0;top:100px;margin: 0 auto;width: 90%;">
+        <form action="javascript:" class="mui-input-group" style="background: transparent">
             <div class="mui-input-row">
-                <span class="tengxun" style="width:80px;">腾讯视频</span>
-                <input type="text" class="mui-input-clear con" placeholder="请输入电影名" name="con">
-            </div>
-            <div class="mui-input-row">
-                <span class="tengxun" style="width:80px;">爱奇艺</span>
-                <input type="text" class="mui-input-clear cona" placeholder="请输入电影名" name="cona">
-            </div>
-            <div class="mui-input-row">
-                <span class="tengxun" style="width:80px;">优酷视频</span>
-                <input type="text" class="mui-input-clear cony" placeholder="请输入电影名" name="cony">
-            </div>
-            <div class="mui-input-row">
-                <span class="tengxun" style="width:80px;">芒果视频</span>
-                <input type="text" class="mui-input-clear conm" placeholder="请输入电影名" name="conm">
+                <!--<span class="tengxun" style="width:80px;"></span>-->
+                <input onkeydown="select1(event)" type="text" class="mui-input-clear con" placeholder="请输入电影名" name="con">
             </div>
         </form>
     </div>
-    <button type="button" data-loading-text="搜索中" class="mui-btn mui-btn-primary" style="width: 90%;margin: 0 auto;display: block;position: absolute;left: 0;right: 0;bottom: 20%;"><i class="mui-icon mui-icon-search" style="font-size: 18px;vertical-align: middle"></i>搜索</button>
+    <button type="button" data-loading-text="搜索中" class="mui-btn mui-btn-primary btn" style="width: 90%;margin: 0 auto;display: block;position: absolute;left: 0;right: 0;bottom: 20%;"><i class="mui-icon mui-icon-search" style="font-size: 18px;vertical-align: middle"></i>搜索</button>
 
     <script>
-        mui(document.body).on('click', '.mui-btn', function(e) {
-            var con = document.querySelector(".con").value;
-            var cona = document.querySelector(".cona").value;
-            var cony = document.querySelector(".cony").value;
-            var conm = document.querySelector(".conm").value;
-            if(con == "" && cona == "" && cony =="" && conm==""){
+        var con = document.querySelector(".con");
+        con.value = localStorage.con?localStorage.con:"";
+        mui(document.body).on('click', '.mui-btn', function() {
+            if(con.value == ""){
                 mui.alert("请输入电影名");
             }else {
                 mui(this).button('loading');
-                if(con == ""){
-                    if(cona == ""){
-                        if(cony == ""){
-                            if(conm == ""){
-                                mui.alert("请输入电影名");
-                            }else{
-                                window.location = "/search?con="+conm+'&yuan=m';
-                            }
-                        }else{
-                            window.location = "/search?con="+cony+'&yuan=y';
-                        }
-                    }else{
-                        window.location = "/search?con="+cona+'&yuan=a';
-                    }
-                }else{
-                    window.location = "/search?con="+con+'&yuan=t';
-                }
+                localStorage.con = con.value;
+                window.location = "/search?con="+con.value;
             }
         });
+        window.onbeforeunload=function(e){
+            var e = window.event||e;
+            // e.returnValue=("确定离开当前页面吗？");
+            mui(".btn").button('reset');
+        }
+        function select1(event){
+            if(event.keyCode==13){
+                if(con.value == ""){
+                    mui.alert("请输入电影名");
+                }else {
+                    mui(document.querySelector(".loading")).button('loading');
+                    localStorage.con = con.value;
+                    window.location = "/search?con="+con.value;
+                }
+            }
+        }
     </script>
 </div>
 </body>
